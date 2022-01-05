@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 PopupMenuThemeData _popupMenuTheme() {
-  return PopupMenuThemeData(
+  return const PopupMenuThemeData(
     color: Colors.orange,
-    shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     elevation: 12.0,
-    textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
+    textStyle: TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
   );
 }
 
@@ -45,11 +43,11 @@ void main() {
 
   testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    PopupMenuThemeData(
-      color: const Color(0xFFFFFFFF),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
+    const PopupMenuThemeData(
+      color: Color(0xFFFFFFFF),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       elevation: 2.0,
-      textStyle: const TextStyle(color: Color(0xffffffff)),
+      textStyle: TextStyle(color: Color(0xffffffff)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -79,7 +77,7 @@ void main() {
             PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<Object>>[
+                return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
                     child: const Text('Example'),
@@ -139,7 +137,7 @@ void main() {
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<Object>>[
-                  PopupMenuItem<void>(
+                  PopupMenuItem<Object>(
                     key: popupItemKey,
                     child: const Text('Example'),
                   ),
@@ -206,7 +204,7 @@ void main() {
               color: color,
               shape: shape,
               itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<Object>>[
+                return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
                     textStyle: textStyle,
@@ -261,16 +259,16 @@ void main() {
         child: Column(
           children: <Widget>[
             PopupMenuTheme(
-              data: PopupMenuThemeData(
+              data: const PopupMenuThemeData(
                 color: Colors.pink,
-                shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
                 elevation: 6.0,
-                textStyle: const TextStyle(color: Color(0xfffff000), textBaseline: TextBaseline.alphabetic),
+                textStyle: TextStyle(color: Color(0xfffff000), textBaseline: TextBaseline.alphabetic),
               ),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
                 itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<Object>>[
+                  return <PopupMenuEntry<void>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,
                       child: const Text('Example'),
@@ -298,7 +296,7 @@ void main() {
       ).last,
     );
     expect(button.color, Colors.pink);
-    expect(button.shape, BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)));
+    expect(button.shape, const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))));
     expect(button.elevation, 6.0);
 
     /// The last DefaultTextStyle widget under popupItemKey is the

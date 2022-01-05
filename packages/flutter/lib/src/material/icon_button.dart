@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -42,37 +40,34 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
 ///
-/// ```dart preamble
-/// double _volume = 0.0;
-/// ```
+/// ** See code in examples/api/lib/material/icon_button/icon_button.0.dart **
+/// {@end-tool}
+///
+/// ### Icon sizes
+///
+/// When creating an icon button with an [Icon], do not override the
+/// icon's size with its [Icon.size] parameter, use the icon button's
+/// [iconSize] parameter instead.  For example do this:
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///   return Column(
-///     mainAxisSize: MainAxisSize.min,
-///     children: <Widget>[
-///       IconButton(
-///         icon: Icon(Icons.volume_up),
-///         tooltip: 'Increase volume by 10',
-///         onPressed: () {
-///           setState(() {
-///             _volume += 10;
-///           });
-///         },
-///       ),
-///       Text('Volume : $_volume')
-///     ],
-///   );
-/// }
+/// IconButton(iconSize: 72, icon: Icon(Icons.favorite), ...)
 /// ```
-/// {@end-tool}
+///
+/// Avoid doing this:
+///
+/// ```dart
+/// IconButton(icon: Icon(Icons.favorite, size: 72), ...)
+/// ```
+///
+/// If you do, the button's size will be based on the default icon
+/// size, not 72, which may produce unexpected layouts and clipping
+/// issues.
 ///
 /// ### Adding a filled background
 ///
@@ -86,8 +81,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// the underlying [Material] along with the splash and highlight
 /// [InkResponse] contributed by descendant widgets.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// In this sample the icon button's background color is defined with an [Ink]
 /// widget whose child is an [IconButton]. The icon button's filled background
 /// is a light shade of blue, it's a filled circle, and it's as big as the
@@ -95,26 +89,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Material(
-///     color: Colors.white,
-///     child: Center(
-///       child: Ink(
-///         decoration: const ShapeDecoration(
-///           color: Colors.lightBlue,
-///           shape: CircleBorder(),
-///         ),
-///         child: IconButton(
-///           icon: Icon(Icons.android),
-///           color: Colors.white,
-///           onPressed: () {},
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/icon_button/icon_button.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -140,26 +115,26 @@ class IconButton extends StatelessWidget {
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
   const IconButton({
-    Key key,
+    Key? key,
     this.iconSize = 24.0,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
     this.splashRadius,
-    @required this.icon,
     this.color,
     this.focusColor,
     this.hoverColor,
     this.highlightColor,
     this.splashColor,
     this.disabledColor,
-    @required this.onPressed,
-    this.mouseCursor = SystemMouseCursors.click,
+    required this.onPressed,
+    this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
     this.enableFeedback = true,
     this.constraints,
+    required this.icon,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -188,7 +163,7 @@ class IconButton extends StatelessWidget {
   ///
   ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
   ///    widgets within a [Theme].
-  final VisualDensity visualDensity;
+  final VisualDensity? visualDensity;
 
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
@@ -211,7 +186,7 @@ class IconButton extends StatelessWidget {
   /// The splash radius.
   ///
   /// If null, default splash radius of [Material.defaultSplashRadius] is used.
-  final double splashRadius;
+  final double? splashRadius;
 
   /// The icon to display inside the button.
   ///
@@ -228,12 +203,12 @@ class IconButton extends StatelessWidget {
   /// The color for the button's icon when it has the input focus.
   ///
   /// Defaults to [ThemeData.focusColor] of the ambient theme.
-  final Color focusColor;
+  final Color? focusColor;
 
   /// The color for the button's icon when a pointer is hovering over it.
   ///
   /// Defaults to [ThemeData.hoverColor] of the ambient theme.
-  final Color hoverColor;
+  final Color? hoverColor;
 
   /// The color to use for the icon inside the button, if the icon is enabled.
   /// Defaults to leaving this up to the [icon] widget.
@@ -247,7 +222,7 @@ class IconButton extends StatelessWidget {
   ///   icon: Icons.widgets,
   /// )
   /// ```
-  final Color color;
+  final Color? color;
 
   /// The primary color of the button when the button is in the down (pressed) state.
   /// The splash is represented as a circular overlay that appears above the
@@ -257,7 +232,7 @@ class IconButton extends StatelessWidget {
   /// color has transparency then the highlight and button color will show through.
   ///
   /// Defaults to the Theme's splash color, [ThemeData.splashColor].
-  final Color splashColor;
+  final Color? splashColor;
 
   /// The secondary color of the button when the button is in the down (pressed)
   /// state. The highlight color is represented as a solid color that is overlaid over the
@@ -265,26 +240,28 @@ class IconButton extends StatelessWidget {
   /// will show through. The highlight fades in quickly as the button is held down.
   ///
   /// Defaults to the Theme's highlight color, [ThemeData.highlightColor].
-  final Color highlightColor;
+  final Color? highlightColor;
 
   /// The color to use for the icon inside the button, if the icon is disabled.
   /// Defaults to the [ThemeData.disabledColor] of the current [Theme].
   ///
   /// The icon is disabled if [onPressed] is null.
-  final Color disabledColor;
+  final Color? disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// Defaults to [SystemMouseCursors.click].
-  final MouseCursor mouseCursor;
+  /// If set to null, will default to
+  /// - [SystemMouseCursors.forbidden], if [onPressed] is null
+  /// - [SystemMouseCursors.click], otherwise
+  final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
@@ -293,7 +270,7 @@ class IconButton extends StatelessWidget {
   ///
   /// This text is displayed when the user long-presses on the button and is
   /// used for accessibility.
-  final String tooltip;
+  final String? tooltip;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -323,13 +300,13 @@ class IconButton extends StatelessWidget {
   ///
   /// The visual density uses the [visualDensity] parameter if specified,
   /// and `Theme.of(context).visualDensity` otherwise.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
-    Color currentColor;
+    Color? currentColor;
     if (onPressed != null)
       currentColor = color;
     else
@@ -379,9 +356,8 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
-        mouseCursor: mouseCursor,
+        mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click),
         enableFeedback: enableFeedback,
-        child: result,
         focusColor: focusColor ?? theme.focusColor,
         hoverColor: hoverColor ?? theme.hoverColor,
         highlightColor: highlightColor ?? theme.highlightColor,
@@ -391,6 +367,7 @@ class IconButton extends StatelessWidget {
           (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
+        child: result,
       ),
     );
   }

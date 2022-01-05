@@ -10,7 +10,7 @@ class BasicProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: ">=2.12.0-0 <3.0.0"
 
   dependencies:
     flutter:
@@ -53,6 +53,50 @@ class BasicProject extends Project {
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
 }
 
+class BasicProjectWithTimelineTraces extends Project {
+  @override
+  final String pubspec = '''
+  name: test
+  environment:
+    sdk: ">=2.12.0-0 <3.0.0"
+
+  dependencies:
+    flutter:
+      sdk: flutter
+  ''';
+
+  @override
+  final String main = r'''
+  import 'dart:async';
+  import 'dart:developer';
+
+  import 'package:flutter/material.dart';
+
+  Future<void> main() async {
+    while (true) {
+      runApp(new MyApp());
+      await Future.delayed(const Duration(milliseconds: 50));
+      Timeline.instantSync('main');
+    }
+  }
+
+  class MyApp extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      topLevelFunction();
+      return new MaterialApp( // BUILD BREAKPOINT
+        title: 'Flutter Demo',
+        home: new Container(),
+      );
+    }
+  }
+
+  topLevelFunction() {
+    print("topLevelFunction"); // TOP LEVEL BREAKPOINT
+  }
+  ''';
+}
+
 class BasicProjectWithFlutterGen extends Project {
   @override
   final String generatedFile = '''
@@ -63,7 +107,7 @@ class BasicProjectWithFlutterGen extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: ">=2.12.0-0 <3.0.0"
 
   dependencies:
     flutter:
@@ -75,6 +119,8 @@ class BasicProjectWithFlutterGen extends Project {
 
   @override
   final String main = r'''
+  // @dart = 2.8
+  // generated package does not support null safety.
   import 'dart:async';
   import 'package:flutter_gen/flutter_gen.dart';
 
@@ -88,7 +134,7 @@ class BasicProjectWithUnaryMain extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: ">=2.12.0-0 <3.0.0"
   dependencies:
     flutter:
       sdk: flutter

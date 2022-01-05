@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -30,6 +30,9 @@ class CleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ and .dart_tool/ directories.';
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
@@ -46,13 +49,17 @@ class CleanCommand extends FlutterCommand {
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
+    deleteFile(flutterProject.packagesFile);
 
     deleteFile(flutterProject.android.ephemeralDirectory);
 
     deleteFile(flutterProject.ios.ephemeralDirectory);
+    deleteFile(flutterProject.ios.ephemeralModuleDirectory);
     deleteFile(flutterProject.ios.generatedXcodePropertiesFile);
     deleteFile(flutterProject.ios.generatedEnvironmentVariableExportScript);
-    deleteFile(flutterProject.ios.compiledDartFramework);
+    deleteFile(flutterProject.ios.deprecatedCompiledDartFramework);
+    deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework);
+    deleteFile(flutterProject.ios.flutterPodspec);
 
     deleteFile(flutterProject.linux.ephemeralDirectory);
     deleteFile(flutterProject.macos.ephemeralDirectory);
@@ -69,7 +76,6 @@ class CleanCommand extends FlutterCommand {
     }
     final Status xcodeStatus = globals.logger.startProgress(
       'Cleaning Xcode workspace...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     try {
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
@@ -97,7 +103,6 @@ class CleanCommand extends FlutterCommand {
     }
     final Status deletionStatus = globals.logger.startProgress(
       'Deleting ${file.basename}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     try {
       file.deleteSync(recursive: true);

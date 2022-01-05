@@ -12,7 +12,7 @@ import '../src/common.dart';
 
 void main() {
   testWithoutContext('state can be set and persists', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('state_dir');
     directory.createSync();
     final File stateFile = directory.childFile('.flutter_tool_state');
@@ -20,22 +20,22 @@ void main() {
       directory: directory,
       logger: BufferLogger.test(),
     );
-    expect(state1.redisplayWelcomeMessage, null);
-    state1.redisplayWelcomeMessage = true;
+    expect(state1.shouldRedisplayWelcomeMessage, null);
+    state1.setShouldRedisplayWelcomeMessage(true);
     expect(stateFile.existsSync(), true);
-    expect(state1.redisplayWelcomeMessage, true);
-    state1.redisplayWelcomeMessage = false;
-    expect(state1.redisplayWelcomeMessage, false);
+    expect(state1.shouldRedisplayWelcomeMessage, true);
+    state1.setShouldRedisplayWelcomeMessage(false);
+    expect(state1.shouldRedisplayWelcomeMessage, false);
 
     final PersistentToolState state2 = PersistentToolState.test(
       directory: directory,
       logger: BufferLogger.test(),
     );
-    expect(state2.redisplayWelcomeMessage, false);
+    expect(state2.shouldRedisplayWelcomeMessage, false);
   });
 
   testWithoutContext('channel versions can be cached and stored', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('state_dir')..createSync();
     final PersistentToolState state1 = PersistentToolState.test(
       directory: directory,

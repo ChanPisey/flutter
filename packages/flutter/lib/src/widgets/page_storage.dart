@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -46,7 +44,7 @@ class _StorageEntryIdentifier {
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys?.join(":")})';
+    return 'StorageEntryIdentifier(${keys.join(":")})';
   }
 }
 
@@ -57,7 +55,7 @@ class _StorageEntryIdentifier {
 class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
-    final Key key = widget.key;
+    final Key? key = widget.key;
     if (key is PageStorageKey)
       keys.add(key);
     return widget is! PageStorage;
@@ -77,7 +75,7 @@ class PageStorageBucket {
     return _StorageEntryIdentifier(_allKeys(context));
   }
 
-  Map<Object, dynamic> _storage;
+  Map<Object, dynamic>? _storage;
 
   /// Write the given data into this page storage bucket using the
   /// specified identifier or an identifier computed from the given context.
@@ -87,14 +85,14 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, { Object identifier }) {
+  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
-      _storage[identifier] = data;
+      _storage![identifier] = data;
     } else {
       final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
       if (contextIdentifier.isNotEmpty)
-        _storage[contextIdentifier] = data;
+        _storage![contextIdentifier] = data;
     }
   }
 
@@ -106,13 +104,13 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, { Object identifier }) {
+  dynamic readState(BuildContext context, { Object? identifier }) {
     if (_storage == null)
       return null;
     if (identifier != null)
-      return _storage[identifier];
+      return _storage![identifier];
     final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-    return contextIdentifier.isNotEmpty ? _storage[contextIdentifier] : null;
+    return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
 }
 
@@ -138,102 +136,13 @@ class PageStorageBucket {
 /// you should give each of them unique [PageStorageKey]s, or set some of their
 /// `keepScrollOffset` false to prevent saving.
 ///
-/// {@tool dartpad --template=freeform}
-///
+/// {@tool dartpad}
 /// This sample shows how to explicitly use a [PageStorage] to
 /// store the states of its children pages. Each page includes a scrollable
 /// list, whose position is preserved when switching between the tabs thanks to
 /// the help of [PageStorageKey].
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() => runApp(MyApp());
-/// ```
-///
-/// ```dart
-/// class MyApp extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatefulWidget {
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
-/// class _MyHomePageState extends State<MyHomePage> {
-///   final List<Widget> pages = <Widget>[
-///     ColorBoxPage(
-///       key: PageStorageKey('pageOne'),
-///     ),
-///     ColorBoxPage(
-///       key: PageStorageKey('pageTwo'),
-///     )
-///   ];
-///   int currentTab = 0;
-///   final PageStorageBucket _bucket = PageStorageBucket();
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text("Persistence Example"),
-///       ),
-///       body: PageStorage(
-///         child: pages[currentTab],
-///         bucket: _bucket,
-///       ),
-///       bottomNavigationBar: BottomNavigationBar(
-///         currentIndex: currentTab,
-///         onTap: (int index) {
-///           setState(() {
-///             currentTab = index;
-///           });
-///         },
-///         items: <BottomNavigationBarItem>[
-///           BottomNavigationBarItem(
-///             icon: Icon(Icons.home),
-///             label: 'page 1',
-///           ),
-///           BottomNavigationBarItem(
-///             icon: Icon(Icons.settings),
-///             label: 'page2',
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-///
-/// class ColorBoxPage extends StatelessWidget {
-///   ColorBoxPage({
-///     Key key,
-///   }) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return ListView.builder(
-///       itemExtent: 250.0,
-///       itemBuilder: (context, index) => Container(
-///         padding: EdgeInsets.all(10.0),
-///         child: Material(
-///           color: index % 2 == 0 ? Colors.cyan : Colors.deepOrange,
-///           child: Center(
-///             child: Text(index.toString()),
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/page_storage/page_storage.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -244,15 +153,15 @@ class PageStorage extends StatelessWidget {
   ///
   /// The [bucket] argument must not be null.
   const PageStorage({
-    Key key,
-    @required this.bucket,
-    @required this.child,
+    Key? key,
+    required this.bucket,
+    required this.child,
   }) : assert(bucket != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The page storage bucket to use for this subtree.
@@ -267,8 +176,10 @@ class PageStorage extends StatelessWidget {
   /// ```dart
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
-  static PageStorageBucket of(BuildContext context) {
-    final PageStorage widget = context.findAncestorWidgetOfExactType<PageStorage>();
+  ///
+  /// This method can be expensive (it walks the element tree).
+  static PageStorageBucket? of(BuildContext context) {
+    final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;
   }
 

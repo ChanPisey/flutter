@@ -2,43 +2,48 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Theme(
-      data: ThemeData(accentColor: kSelectedColor),
-      child: SizedBox.expand(
-        child: Center(
-          child: SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: Column(
-              children: <Widget>[
-                TabPageSelector(
-                  controller: tabController,
-                  color: color,
-                  selectedColor: selectedColor,
-                  indicatorSize: indicatorSize,
-                ),
-                Flexible(
-                  child: TabBarView(
+Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0 }) {
+  return Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Theme(
+        data: ThemeData(colorScheme: const ColorScheme.light().copyWith(secondary: kSelectedColor)),
+        child: SizedBox.expand(
+          child: Center(
+            child: SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: Column(
+                children: <Widget>[
+                  TabPageSelector(
                     controller: tabController,
-                    children: const <Widget>[
-                      Center(child: Text('0')),
-                      Center(child: Text('1')),
-                      Center(child: Text('2')),
-                    ],
+                    color: color,
+                    selectedColor: selectedColor,
+                    indicatorSize: indicatorSize,
                   ),
-                ),
-              ],
+                  Flexible(
+                    child: TabBarView(
+                      controller: tabController,
+                      children: const <Widget>[
+                        Center(child: Text('0')),
+                        Center(child: Text('1')),
+                        Center(child: Text('2')),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -92,7 +97,7 @@ void main() {
     tabController.animateTo(1, duration: const Duration(milliseconds: 200));
     await tester.pump();
     // Verify that indicator 0's color is becoming increasingly transparent,
-    /// and indicator 1's color is becoming increasingly opaque during the
+    // and indicator 1's color is becoming increasingly opaque during the
     // 200ms animation. Indicator 2 remains transparent throughout.
     await tester.pump(const Duration(milliseconds: 10));
     List<Color> colors = indicatorColors(tester);
